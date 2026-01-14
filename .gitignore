@@ -1,0 +1,24 @@
+# Machine-specific configuration
+config.env
+
+# Server files and worlds
+server/
+
+# Hytale downloader
+downloader/
+.hytale-downloader-credentials.json
+
+# Playit.gg tunnel
+playit-windows.exe
+playit.toml
+
+# Windows system files
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
