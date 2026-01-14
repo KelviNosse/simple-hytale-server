@@ -25,7 +25,7 @@ if (-not (Test-Path "playit-windows.exe")) {
 }
 
 Write-Host "Starting Playit.gg tunnel..." -ForegroundColor Yellow
-Start-Process -FilePath "playit-windows.exe" -WindowStyle Hidden
+Start-Process -FilePath "playit-windows.exe" -WindowStyle Normal
 Start-Sleep -Seconds 3
 
 Write-Host ""
@@ -37,6 +37,6 @@ Write-Host "Visit https://playit.gg to claim your tunnel URL" -ForegroundColor C
 Write-Host "Share that URL with friends to connect" -ForegroundColor White
 Write-Host ""
 Write-Host "Tunnel is running in the background." -ForegroundColor Green
-Write-Host "Now run start.bat in another terminal to start the server." -ForegroundColor Yellow
+Write-Host "Now you can start the server." -ForegroundColor Yellow
 Write-Host ""
 Read-Host "Press Enter to exit"

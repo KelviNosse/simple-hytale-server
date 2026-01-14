@@ -250,7 +250,7 @@ if (-not (Test-Path "downloader\hytale-downloader-windows-amd64.exe")) {
     Invoke-WebRequest -Uri "https://downloader.hytale.com/hytale-downloader.zip" -OutFile "downloader\hytale-downloader.zip"
     
     Write-Host "Extracting downloader..." -ForegroundColor Yellow
-    Expand-Archive -Path "downloader\hytale-downloader.zip" -DestinationPath "downloader" -Force
+    tar -xf "downloader\hytale-downloader.zip" -C "downloader"
     Remove-Item "downloader\hytale-downloader.zip"
 }
 
@@ -275,7 +275,7 @@ Pop-Location
 if (Test-Path "server.zip") {
     Write-Host ""
     Write-Host "Extracting server files..." -ForegroundColor Yellow
-    Expand-Archive -Path "server.zip" -DestinationPath "server" -Force
+    tar -xf "server.zip" -C "server"
     Remove-Item "server.zip"
     Write-Host "Server files extracted successfully!" -ForegroundColor Green
 }
@@ -283,12 +283,10 @@ if (Test-Path "server.zip") {
 # Check if Assets.zip exists and extract it
 if (Test-Path "server\Assets.zip") {
     Write-Host ""
-    Write-Host "Extracting assets... This may take a few minutes." -ForegroundColor Yellow
-    Push-Location server
-    Expand-Archive -Path "Assets.zip" -DestinationPath "." -Force
-    Remove-Item "Assets.zip"
+    Write-Host "Extracting assets (using fast extraction)..." -ForegroundColor Yellow
+    tar -xf "server\Assets.zip" -C "server"
+    Remove-Item "server\Assets.zip"
     Write-Host "Assets extracted successfully." -ForegroundColor Green
-    Pop-Location
 }
 
 if (-not (Test-Path "server\Server\HytaleServer.jar")) {
@@ -352,7 +350,9 @@ $configJson = @"
 }
 "@
 
-$configJson | Out-File -FilePath "server\config.json" -Encoding UTF8
+# Write without BOM (Java doesn't accept BOM in JSON)
+$utf8NoBom = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText((Join-Path (Get-Location) "server\config.json"), $configJson, $utf8NoBom)
 
 Write-Host "Server config created!" -ForegroundColor Green
 Write-Host ""
@@ -383,7 +383,7 @@ Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host "  IMPORTANT - AUTHENTICATION SETUP" -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "The server will start now." -ForegroundColor White
+Write-Host "The server will start in a new window." -ForegroundColor White
 Write-Host "In the server console, you need to run these commands:" -ForegroundColor White
 Write-Host ""
 Write-Host "  1. /auth persistence Encrypted" -ForegroundColor Yellow
@@ -394,13 +394,18 @@ Write-Host "After that, you can stop the server with: /stop" -ForegroundColor Wh
 Write-Host ""
 Read-Host "Press Enter to start the server"
 
-Push-Location server
+$serverPath = Join-Path (Get-Location) "server"
+$javaArgs = "-Xms$($ramMin)G", "-Xmx$($ramMax)G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:MaxGCPauseMillis=200", "-jar", "Server\HytaleServer.jar", "--assets", "."
+
 if ($javaPath -eq "java") {
-    & java -Xms"$ramMin`G" -Xmx"$ramMax`G" -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar Server\HytaleServer.jar --assets .
+    Start-Process -FilePath "java" -ArgumentList $javaArgs -WorkingDirectory $serverPath -WindowStyle Normal
 } else {
-    & $javaPath -Xms"$ramMin`G" -Xmx"$ramMax`G" -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar Server\HytaleServer.jar --assets .
+    Start-Process -FilePath $javaPath -ArgumentList $javaArgs -WorkingDirectory $serverPath -WindowStyle Normal
 }
-Pop-Location
+
+Write-Host ""
+Write-Host "Server window opened - complete the authentication steps there" -ForegroundColor Green
+Start-Sleep -Seconds 2
 
 Write-Host ""
 Write-Host "=========================================" -ForegroundColor Green

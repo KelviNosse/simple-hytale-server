@@ -24,10 +24,8 @@ $javaExe = $config['JAVA_EXE']
 $ramMin = $config['RAM_MIN']
 $ramMax = $config['RAM_MAX']
 
-Push-Location server
-
 # Check if server is already authenticated
-if (-not (Test-Path "auth.enc")) {
+if (-not (Test-Path "server\auth.enc")) {
     Write-Host ""
     Write-Host "=========================================" -ForegroundColor Cyan
     Write-Host "  FIRST TIME SETUP - AUTHENTICATION" -ForegroundColor Cyan
@@ -48,14 +46,18 @@ if (-not (Test-Path "auth.enc")) {
     Write-Host ""
 }
 
-Write-Host "Starting Hytale Server..." -ForegroundColor Green
+Write-Host "Starting Hytale Server in new window..." -ForegroundColor Green
 Write-Host ""
 
+$serverPath = Join-Path (Get-Location) "server"
+$javaArgs = "-Xms$($ramMin)G", "-Xmx$($ramMax)G", "-XX:+UseG1GC", "-XX:+ParallelRefProcEnabled", "-XX:MaxGCPauseMillis=200", "-jar", "Server\HytaleServer.jar", "--assets", "."
+
 if ($javaExe -eq "java") {
-    & java -Xms"$ramMin`G" -Xmx"$ramMax`G" -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar Server\HytaleServer.jar --assets .
+    Start-Process -FilePath "java" -ArgumentList $javaArgs -WorkingDirectory $serverPath -WindowStyle Normal
 } else {
-    & $javaExe -Xms"$ramMin`G" -Xmx"$ramMax`G" -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar Server\HytaleServer.jar --assets .
+    Start-Process -FilePath $javaExe -ArgumentList $javaArgs -WorkingDirectory $serverPath -WindowStyle Normal
 }
 
-Pop-Location
+Write-Host "Server started in separate window" -ForegroundColor Green
+Write-Host ""
 Read-Host "Press Enter to exit"
