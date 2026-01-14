@@ -3,6 +3,8 @@
 Automated Hytale server setup for Windows. Bare-metal deployment for plugins, mods, and 24/7 hosting.
 
 > **Not for casual play** - Use Hytale's built-in invite code feature for quick sessions with friends.
+> 
+> **Note:** Scripts use PowerShell internally (`.bat` wrappers provided for convenience).
 
 ## Requirements
 
