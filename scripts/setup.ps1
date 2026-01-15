@@ -134,7 +134,7 @@ if ($javaInstalled) {
             Write-Host "(A UAC prompt may appear - please click Yes to allow installation)" -ForegroundColor Yellow
             Write-Host ""
             
-            winget install EclipseAdoptium.Temurin.25.JDK --silent --accept-package-agreements --accept-source-agreements
+            winget install EclipseAdoptium.Temurin.25.JDK --source winget --silent --accept-package-agreements --accept-source-agreements
             
             Write-Host ""
             Write-Host "Refreshing environment..." -ForegroundColor Yellow
